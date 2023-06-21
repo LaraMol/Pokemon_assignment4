@@ -1,7 +1,0 @@
-﻿  Pokemon4.cpp
-C:\Users\Laram\source\repos\LaraMol\Pokemon_assignment4\Pokemon4\Pokemon4.cpp(82,1): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
-          with
-          [
-              _Ty=int
-          ]
-  Pokemon4.vcxproj -> C:\Users\Laram\source\repos\LaraMol\Pokemon_assignment4\Pokemon4\x64\Debug\Pokemon4.exe
