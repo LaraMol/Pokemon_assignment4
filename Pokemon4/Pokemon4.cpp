@@ -1,158 +1,213 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <random>
 
-
-/// Pokemon class with names and types.
 class Pokemon {
-public:
-    Pokemon(const std::string& name, const std::string& type)
-        : name(name), type(type) {}
+private:
+    std::string name;
+    std::string strength;
+    std::string weakness;
 
-    const std::string& getName() const {
+public:
+    Pokemon(const std::string& name, const std::string& strength, const std::string& weakness)
+        : name(name), strength(strength), weakness(weakness) {}
+
+    std::string getName() const {
         return name;
     }
 
-    const std::string& getType() const {
-        return type;
+    std::string getStrength() const {
+        return strength;
     }
 
-private:
-    std::string name;
-    std::string type;
+    std::string getWeakness() const {
+        return weakness;
+    }
+
+    virtual void battleCry() {} // make it virtual
 };
 
-
-/// Battle class the rock paper scissors type of fight. type weaknesses.
-class Battle {
+class Charmander : public Pokemon {
 public:
-    static const Pokemon* fight(const Pokemon* pokemonOne, const Pokemon* pokemonTwo) {
-        if (pokemonOne->getType() == "fire" && pokemonTwo->getType() == "grass") {
-            return pokemonOne;
-        }
-        else if (pokemonOne->getType() == "grass" && pokemonTwo->getType() == "water") {
-            return pokemonOne;
-        }
-        else if (pokemonOne->getType() == "water" && pokemonTwo->getType() == "fire") {
-            return pokemonOne;
-        }
-        else if (pokemonTwo->getType() == "fire" && pokemonOne->getType() == "grass") {
-            return pokemonTwo;
-        }
-        else if (pokemonTwo->getType() == "grass" && pokemonOne->getType() == "water") {
-            return pokemonTwo;
-        }
-        else if (pokemonTwo->getType() == "water" && pokemonOne->getType() == "fire") {
-            return pokemonTwo;
-        }
-        else {
-            return nullptr;
-        }
+    Charmander(const std::string& name)
+        : Pokemon(name, "Fire", "Water") {}
+
+    void battleCry() override {
+        std::cout << "Charmander: Char-char!" << std::endl;
     }
 };
 
-/// Arena class where we save the the rounds and battles.
-class Arena {
+class Squirtle : public Pokemon {
 public:
-    static int rounds;
-    static int battles;
+    Squirtle(const std::string& name)
+        : Pokemon(name, "Water", "Leaf") {}
+
+    void battleCry() override {
+        std::cout << "Squirtle: squirtle-squirtle!" << std::endl;
+    }
 };
 
-int Arena::rounds = 0;
-int Arena::battles = 0;
+class Bulbasaur : public Pokemon {
+public:
+    Bulbasaur(const std::string& name)
+        : Pokemon(name, "Grass", "Fire") {}
 
+    void battleCry() override {
+        std::cout << "Bulbasaur: Bulba-Bulba!" << std::endl;
+    }
+};
 
-/// Trainer class   
 class Trainer {
-public:
-    Trainer(const std::string& name, const std::vector<Pokemon>& pokemons)
-        : name(name), pokemons(pokemons) {}
-
-    const std::string& getName() const {
-        return name;
-    }
-
-
-    const Pokemon* get_random_pokemon() const {
-        ///creates an object that is used to obtain a seed for the random number engine
-        std::random_device rd;
-        ///This is a random number engine that generates random numbers using the Mersenne Twister algorithm
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, pokemons.size() - 1);
-        return &pokemons[dis(gen)];
-    }
-
 private:
     std::string name;
-    std::vector<Pokemon> pokemons;
-};
-/// <summary>
-/// BattleArena
-/// </summary>
-class BattleArena {
+    std::vector<Pokemon*> belt;
+
 public:
-    static void start_battle(const Trainer& Challenger, const Trainer& opponent) {
-        Arena::battles++;
-        const Pokemon* Challenger_pokemon = Challenger.get_random_pokemon();
-        const Pokemon* opponent_pokemon = opponent.get_random_pokemon();
-        const std::string& Challenger_name = Challenger.getName();
-        const std::string& opponent_name = opponent.getName();
-        const std::string& pokemonOne_name = Challenger_pokemon->getName();
-        const std::string& pokemonTwo_name = opponent_pokemon->getName();
-        const std::string& pokemonOne_type = Challenger_pokemon->getType();
-        const std::string& pokemonTwo_type = opponent_pokemon->getType();
-        const Pokemon* winner = nullptr;
-        while (winner == nullptr) {
-            std::cout << "Round: " << Arena::rounds + 1 << std::endl;
-            std::cout << Challenger_name << "'s " << pokemonOne_name << " vs. " << opponent_name << "'s " << pokemonTwo_name << std::endl;
-            winner = Battle::fight(Challenger_pokemon, opponent_pokemon);
-            if (winner == nullptr) {
-                std::cout << "It's a draw!" << std::endl << std::endl;
-                if (Arena::rounds > 0) {
-                    winner = (winner == Challenger_pokemon) ? opponent_pokemon : Challenger_pokemon;
-                    std::cout << "Previous winner " << winner->getName() << " returns to their pokeball." << std::endl << std::endl;
-                }
-            }
-            else {
-                std::cout << winner->getName() << " wins the round!" << std::endl << std::endl;
-            }
-            Arena::rounds++;
+    Trainer(const std::string& n)
+        : name(n) {}
+
+    ~Trainer() {
+        for (Pokemon* pokemon : belt) {
+            delete pokemon;
+        }
+    }
+
+    void addPokemon(Pokemon* pokemon) {
+        belt.push_back(pokemon);
+    }
+
+    Pokemon* throwPokeball() const {
+        int index = rand() % belt.size();
+        Pokemon* pokemon = belt[index];
+        std::cout << name << ", I choose you, " << pokemon->getName() << "!" << std::endl;
+        pokemon->battleCry();
+        return pokemon;
+    }
+
+    void returnPokemon(Pokemon* pokemon) const {
+        std::cout << name << ", rest well, " << pokemon->getName() << "!" << std::endl;
+        pokemon->battleCry();
+    }
+
+    int getNumPokeballs() const {
+        return belt.size();
+    }
+
+    std::string getName() const {
+        return name;
+    }
+};
+
+class Battle {
+private:
+    Trainer* trainer1;
+    Trainer* trainer2;
+
+public:
+    Battle(Trainer* t1, Trainer* t2)
+        : trainer1(t1), trainer2(t2) {}
+
+    void fight() {
+        std::cout << "Battle starts!" << std::endl;
+
+        Pokemon* pokemon1 = trainer1->throwPokeball();
+        Pokemon* pokemon2 = trainer2->throwPokeball();
+
+        std::string strength1 = pokemon1->getStrength();
+        std::string strength2 = pokemon2->getStrength();
+        std::string weakness1 = pokemon1->getWeakness();
+        std::string weakness2 = pokemon2->getWeakness();
+
+        if (strength1 == weakness2 && strength2 == weakness1) {
+            // Draw
+            std::cout << "It's a draw!" << std::endl;
+            trainer1->returnPokemon(pokemon1);
+            trainer2->returnPokemon(pokemon2);
+        }
+        else if (strength1 == weakness2) {
+            // Trainer 1 wins
+            std::cout << trainer1->getName() << " wins the round!" << std::endl;
+            trainer2->returnPokemon(pokemon2);
+        }
+        else if (strength2 == weakness1) {
+            // Trainer 2 wins
+            std::cout << trainer2->getName() << " wins the round!" << std::endl;
+            trainer1->returnPokemon(pokemon1);
         }
 
-        std::cout << "Battle over!" << std::endl;
-        if (winner == Challenger_pokemon) {
-            std::cout << Challenger_name << " wins the battle!" << std::endl;
-        }
-        else {
-            std::cout << opponent_name << " wins the battle!" << std::endl;
-        }
+        std::cout << "Round ends!" << std::endl;
+    }
+};
+
+class Arena {
+private:
+    int totalRounds;
+    int totalBattles;
+
+public:
+    Arena() : totalRounds(0), totalBattles(0) {}
+
+    void startBattle(Trainer* trainer1, Trainer* trainer2) {
+        Battle battle(trainer1, trainer2);
+        battle.fight();
+        totalRounds++;
+        totalBattles++;
+    }
+
+    void displayScoreboard() const {
+        std::cout << "Scoreboard" << std::endl;
+        std::cout << "Total Rounds: " << totalRounds << std::endl;
+        std::cout << "Total Battles: " << totalBattles << std::endl;
+    }
+
+    void resetScoreboard() {
+        totalRounds = 0;
+        totalBattles = 0;
     }
 };
 
 int main() {
-    std::string Challenger_name;
-    std::string opponent_name;
-    std::string restart;
+    srand(static_cast<unsigned>(time(0)));
 
-    Pokemon pokemonOne("Charmander", "fire");
-    Pokemon pokemonTwo("Bulbasaur", "grass");
-    Pokemon pokemonThree("Squirtle", "water");
+    Arena arena;
 
-    std::cout << "Enter Trainer 1's name: ";
-    std::cin >> Challenger_name;
-    Trainer Challenger(Challenger_name, { pokemonOne, pokemonTwo, pokemonThree });
+    std::cout << "Enter the name of Trainer 1: ";
+    std::string trainer1Name;
+    std::getline(std::cin, trainer1Name);
+    Trainer challengerOne(trainer1Name);
 
-    std::cout << "Enter Trainer 2's name: ";
-    std::cin >> opponent_name;
-    Trainer opponent(opponent_name, { pokemonOne, pokemonTwo, pokemonThree });
+    std::cout << "Enter the name of Trainer 2: ";
+    std::string trainer2Name;
+    std::getline(std::cin, trainer2Name);
+    Trainer opponentOne(trainer2Name);
 
-    do {
-        BattleArena::start_battle(Challenger, opponent);
+    challengerOne.addPokemon(new Squirtle("Squirtle"));
+    challengerOne.addPokemon(new Bulbasaur("Bulbasaur"));
+    challengerOne.addPokemon(new Charmander("Charmander"));
 
-        std::cout << "Enter (R) to restart or any other key to quit: ";
-        std::cin >> restart;
-    } while (restart == "R" || restart == "r");
+    opponentOne.addPokemon(new Squirtle("Squirtle"));
+    opponentOne.addPokemon(new Bulbasaur("Bulbasaur"));
+    opponentOne.addPokemon(new Charmander("Charmander"));
+
+    bool restart = true;
+    while (restart) {
+        arena.startBattle(&challengerOne, &opponentOne);
+
+        std::cout << "\n\n";  // Add white spaces between battles for better readability
+
+        arena.displayScoreboard();
+
+        std::cout << "Do you want to restart? (y/n): ";
+        std::string input;
+        std::cin >> input;
+
+        restart = (input == "y" || input == "Y");
+        if (restart) {
+            arena.resetScoreboard();
+        }
+
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Ignore remaining newline character
+    }
 
     return 0;
 }
