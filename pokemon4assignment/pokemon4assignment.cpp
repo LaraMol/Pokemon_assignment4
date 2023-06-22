@@ -208,8 +208,6 @@ int main() {
         if (restart) {
             arena.resetScoreboard();
         }
-
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Ignore remaining newline character
     }
 
     return 0;
