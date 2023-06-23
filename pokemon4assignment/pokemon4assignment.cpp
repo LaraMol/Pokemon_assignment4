@@ -111,6 +111,7 @@ public:
 
     void fight() {
         std::cout << "Battle starts!" << std::endl;
+        std::cout << "\n";
 
         Pokemon* pokemon1 = trainer1->throwPokeball();
         Pokemon* pokemon2 = trainer2->throwPokeball();
@@ -138,6 +139,7 @@ public:
         }
 
         std::cout << "Round ends!" << std::endl;
+        std::cout << "\n";
     }
 };
 
@@ -150,10 +152,12 @@ public:
     Arena() : totalRounds(0), totalBattles(0) {}
 
     void startBattle(Trainer* trainer1, Trainer* trainer2) {
-        Battle battle(trainer1, trainer2);
-        battle.fight();
-        totalRounds++;
-        totalBattles++;
+        for (int i = 0; i < 6; i++) {
+            Battle battle(trainer1, trainer2);
+            battle.fight();
+            totalRounds++;
+            totalBattles++;
+        }
     }
 
     void displayScoreboard() const {
@@ -163,7 +167,8 @@ public:
     }
 
     void resetScoreboard() {
-        totalBattles;
+        totalBattles = 0;
+        totalRounds = 0;
     }
 };
 
@@ -208,6 +213,8 @@ int main() {
         if (restart) {
             arena.resetScoreboard();
         }
+
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Ignore remaining newline character
     }
 
     return 0;
